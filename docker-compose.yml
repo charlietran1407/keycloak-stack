@@ -1,0 +1,62 @@
+name: keycloak-stack
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.4
+    ports:      
+      - 8280:8080
+      - 9200:9000
+    environment:   
+      - KC_HEALTH_ENABLED=true
+      - KC_METRICS_ENABLED=true
+      - KC_HOSTNAME_STRICT_BACKCHANNEL=false
+      - KC_HOSTNAME_PORT=8080
+      - DB_VENDOR=postgres
+      - DB_ADDR=postgres
+      - DB_DATABASE=keycloak
+      - DB_USER=keycloak
+      - DB_PASSWORD=Welcome@123      
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres/keycloak
+      - KC_DB_USERNAME=keycloak
+      - KC_DB_PASSWORD=Welcome@123
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KEYCLOAK_ADMIN=charlietran1407
+      - KEYCLOAK_ADMIN_PASSWORD=Welcome@123
+      - KEYCLOAK_SSL_REQUIRED=none
+    depends_on:
+      - postgres      
+    restart: unless-stopped
+    volumes:
+      - D:/Working/Projects/keycloak/mytheme:/opt/keycloak/themes/mytheme
+    command:
+      - start
+      - --proxy-headers
+      - forwarded
+      - --http-management-relative-path=/management
+      - --spi-theme-static-max-age=-1 
+      - --spi-theme-cache-themes=false 
+      - --spi-theme-cache-templates=false
+    networks:
+      - keycloak-network
+  postgres:
+    image: postgres:latest    
+    container_name: postgres
+    volumes:
+      - kc_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=Welcome@123
+      - TZ="Asia/Ho_Chi_Minh"
+    networks:
+      - keycloak-network
+    restart: unless-stopped
+networks:
+  keycloak-network:
+    driver: bridge
+volumes:
+  kc_postgres_data:s
